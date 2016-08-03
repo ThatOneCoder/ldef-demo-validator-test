@@ -78,13 +78,13 @@ public class Processor {
         // create mongo client
         MongoClient mongo = new MongoClient( mongoIp , 27017 );
 
-        if (System.getenv("MONGODB_AUTH").equals("true")) {
-            String username = (System.getenv("MONGODB_USERNAME")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_USERNAME");
-            String password = (System.getenv("MONGODB_PASSWORD")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_PASSWORD");
-            String database = (System.getenv("MONGODB_DATABASE")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_DATABASE");
-            MongoCredential credentials = MongoCredential.createCredential(username, database, password);
-            mongo = new MongoClient( mongoIp , credentials );
-        }
+//        if (System.getenv("MONGODB_AUTH").equals("true")) {
+//            String username = (System.getenv("MONGODB_USERNAME")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_USERNAME");
+//            String password = (System.getenv("MONGODB_PASSWORD")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_PASSWORD");
+//            String database = (System.getenv("MONGODB_DATABASE")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_DATABASE");
+//            com.mongodb.MongoCredential credentials = MongoCredential.createCredential(username, database, password);
+//            mongo = new MongoClient( mongoIp , credentials );
+//        }
 
         // get mongo db
         DB db = mongo.getDB("ldef_hl7_demo");
