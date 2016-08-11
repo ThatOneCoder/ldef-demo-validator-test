@@ -38,7 +38,9 @@ public class Processor {
 //        convertHL7ToXML(in);
 
         // immediately store message in cassandra
-        recordMessage(msg, "RAW");
+
+        // uncomment it
+        //recordMessage(msg, "RAW");
 
         // check if BSI rev 9 message is an ER message
 //        boolean isER = isERMessage(msg);
@@ -49,6 +51,7 @@ public class Processor {
 //        System.out.println(convertHL7ToXML(in));
 
 //        publishToQueue(msg);
+        System.out.println("---MESSAGE TO CONSOLE---");
         System.out.println(msg);
 //        }
     }
