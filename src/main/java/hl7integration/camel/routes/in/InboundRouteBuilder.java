@@ -23,7 +23,7 @@ public class InboundRouteBuilder extends SpringRouteBuilder {
         from("mina:tcp://" + vHost + ":" + vPort + "?sync=true&codec=#hl7codec")
                 //.transacted()
                 .routeId("Validator-Camel-Route")
-                .to("bean:processor?method=process")
+                .to("bean:processor?method=processMessage")
                 .to("bean:respondACK?method=process")
                 .end();
     }

@@ -262,7 +262,9 @@ public class Processor {
                     //TODO: convert to XML
                     recordMessage("XML", msg, "XML");
                     //publish xml to queue
+                    System.out.println("----publishing to queue----");
                     publishToQueue(msg);
+                    System.out.println("----published to queue-----");
 
                     //TODO: validate cda portion???
                 } else {
