@@ -58,25 +58,7 @@ public class Processor {
 
     public void recordMessage(String msg, String status) throws Exception {
         java.util.Date date = new java.util.Date();
-
-        // create cluster
-//        Cluster cluster;
-//
-//        // create session
-//        Session session = null;
-//
-//        String cassandraIp = getPropValues("cassandra-ip");
-//        String keyspace = getPropValues("cassandra-keyspace");
-
         String mongoIp = (System.getenv("MONGODB_SERVICE_HOST")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_SERVICE_HOST");
-//
-//        cluster = Cluster.builder().addContactPoint(cassandraIp).build();
-////        cluster = Cluster.builder().addContactPoint("10.32.227.87").build();
-//        session = cluster.connect(keyspace);
-////        cluster = Cluster.builder().addContactPoint("10.32.227.87").build();
-////        System.out.println("connected to keyspace " + keyspace + " at IP " + cassandraIp);
-
-
 
         // create mongo client
         MongoClient mongo = new MongoClient( mongoIp , 27017 );
@@ -111,8 +93,6 @@ public class Processor {
         String assign_auth = String.valueOf(terser.get("/MSH-4-2"));
         String eoc_acc = String.valueOf(terser.get("/PID-3-1"));
         String episode = assign_auth + eoc_acc;
-//        System.out.println("episode: " + episode);
-//        System.out.print(msg);
 
         String dt = "dateof( now() )";
         String type = String.valueOf(terser.get("/MSH-9-1"));
@@ -126,16 +106,6 @@ public class Processor {
         document.put("statusdate", date);
         document.put("type", type);
         table.insert(document);
-
-//        System.out.println("query");
-//        System.out.println(query);
-        // record message event
-        // last_modified, action, data
-
-//        session.execute(query);
-//
-//        // close cluster
-//        cluster.close();
     }
 
     public void publishToQueue(String msg) throws IOException {
@@ -301,28 +271,36 @@ public class Processor {
     }
 
     public void recordMessage(String msgType, String msg, String status) throws Exception {
+
         java.util.Date date = new java.util.Date();
+        String mongoIp = (System.getenv("MONGODB_SERVICE_HOST")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_SERVICE_HOST");
+//
+        // create mongo client
+        MongoClient mongo = new MongoClient( mongoIp , 27017 );
 
-        // create cluster
-        Cluster cluster;
+//        if (System.getenv("MONGODB_AUTH").equals("true")) {
+//            String username = (System.getenv("MONGODB_USERNAME")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_USERNAME");
+//            String password = (System.getenv("MONGODB_PASSWORD")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_PASSWORD");
+//            String database = (System.getenv("MONGODB_DATABASE")== null) ? getPropValues("mongo-ip") : System.getenv("MONGODB_DATABASE");
+//            com.mongodb.MongoCredential credentials = MongoCredential.createCredential(username, database, password);
+//            mongo = new MongoClient( mongoIp , credentials );
+//        }
 
-        // create session
-        com.datastax.driver.core.Session session = null;
+        // get mongo db
+        DB db = mongo.getDB("ldef_hl7_demo");
 
-        String cassandraIp = getPropValues("cassandra-ip");
-        String keyspace = getPropValues("cassandra-keyspace");
+        // get mongo collection (aka table)
+        DBCollection table = db.getCollection("message");
 
-        cluster = Cluster.builder().addContactPoint(cassandraIp).build();
-//        cluster = Cluster.builder().addContactPoint("10.32.227.87").build();
-        session = cluster.connect(keyspace);
-//        cluster = Cluster.builder().addContactPoint("10.32.227.87").build();
-//        System.out.println("connected to keyspace " + keyspace + " at IP " + cassandraIp);
+        // create document(data)
+        BasicDBObject document = new BasicDBObject();
 
         // create hapi context
         HapiContext context = new DefaultHapiContext();
 
         // set up
         context.setModelClassFactory(new GenericModelClassFactory());
+        context.setValidationContext(ValidationContextFactory.noValidation());
         GenericMessage genMessage = (GenericMessage) context.getPipeParser().parse(msg);
         Terser terser = new Terser(genMessage);
 
@@ -330,7 +308,6 @@ public class Processor {
         String assign_auth = String.valueOf(terser.get("/MSH-4-2"));
         String eoc_acc = String.valueOf(terser.get("/PID-3-1"));
         String episode = assign_auth + eoc_acc;
-//        System.out.println("episode: " + episode);
 
         String dt = "dateof( now() )";
         String type = String.valueOf(terser.get("/MSH-9-1"));
@@ -341,15 +318,15 @@ public class Processor {
         }
 
         String query = ("INSERT INTO message (id, episode, message, status, statusdate, type) VALUES (now(),'" + episode + "','" + msg + "','" + status + "'," + dt + ",'" + type + "')");
-//        System.out.println("query");
-//        System.out.println(query);
-        // record message event
-        // last_modified, action, data
 
-        session.execute(query);
 
-        // close cluster
-        cluster.close();
+        // add data to a mongo document
+        document.put("episode", episode);
+        document.put("message", msg);
+        document.put("status", status);
+        document.put("statusdate", date);
+        document.put("type", type);
+        table.insert(document);
     }
 
     public boolean isERMessage(String msg) throws HL7Exception {
