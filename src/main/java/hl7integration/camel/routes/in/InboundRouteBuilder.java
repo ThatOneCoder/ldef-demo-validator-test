@@ -20,10 +20,11 @@ public class InboundRouteBuilder extends SpringRouteBuilder {
         String vPort = (System.getenv("VALIDATOR_SERVICE_PORT")== null) ? processor.getPropValues("endpoint.port") : System.getenv("VALIDATOR_SERVICE_PORT");
 
         System.out.println(processor.getPropValues("endpoint-server"));
-        from("mina:tcp://" + vHost + ":" + vPort + "?sync=true&codec=#hl7codec").routeId("Validator-Camel-Route")
+        from("mina:tcp://" + vHost + ":" + vPort + "?sync=true&codec=#hl7codec")
+                //.transacted()
+                .routeId("Validator-Camel-Route")
                 .to("bean:processor?method=processMessage")
-                .transacted()
-                //.to("bean:respondACK?method=process")
+                .to("bean:respondACK?method=process")
                 .end();
     }
 }
